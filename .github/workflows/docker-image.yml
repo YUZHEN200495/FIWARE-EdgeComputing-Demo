@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - uses: actions/checkout@main
+    - name: Build Images
+      run: |
+        ./services create || true
+    - name: Run Script
+      run: |
+        ./services start test && ./services stop test
