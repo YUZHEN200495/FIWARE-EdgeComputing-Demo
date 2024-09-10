@@ -7,13 +7,16 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  build:
-
+  test-modules:
+    name: Test Script
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
     steps:
-    - uses: actions/checkout@main
+    - uses: actions/checkout@master
+      with:
+        persist-credentials: false 
+        fetch-depth: 0
+        submodules: recursive
     - name: Build Images
       run: |
         ./services create || true
