@@ -1,0 +1,71 @@
+version: "3.8"
+services:
+  # @context file is served from here
+  ld-context:
+    labels:
+      org.fiware: 'tutorial'
+    image: httpd:alpine
+    hostname: context
+    container_name: fiware-ld-context
+    ports:
+        - "3004:80"
+   # Databases
+  orion:
+    platform: linux/amd64
+    image: quay.io/fiware/orion-ld:${ORION_LD_VERSION}
+    hostname: orion
+    container_name: fiware-orion
+    depends_on:
+      - mongo-db
+    networks:
+      - default
+    expose:
+      - "1026"
+    ports:
+      - "${EXPOSED_PORT:-1026}:${ORION_LD_PORT:-1026}"
+    command: -dbhost mongo-db -logLevel DEBUG -forwarding -mongocOnly
+    healthcheck:
+      test: curl --fail -s http://orion:${ORION_LD_PORT}/version || exit 1
+
+  mongo-db:
+    image: mongo:${MONGO_DB_VERSION}
+    hostname: mongo-db
+    container_name: db-mongo
+    expose:
+      - "${MONGO_DB_PORT}"
+    ports:
+      - "${MONGO_DB_PORT}:${MONGO_DB_PORT}" # localhost:27017
+    networks:
+      - default
+    volumes:
+      - mongo-db:/data/db
+      - mongo-config:/data/configdb
+
+ 
+    # Tutorial acts as a series of dummy IoT Sensors over HTTP
+  tutorial:
+    image: quay.io/fiware/tutorials.ngsi-ld
+    hostname: iot-sensors
+    container_name: fiware-tutorial
+    networks:
+        - default
+    expose:
+        - "3000"
+        - "3001"
+    ports:
+        - "3000:3000"
+        - "3001:3001"
+    environment:
+        - "DEBUG=tutorial:*"
+        - "PORT=3000"
+        - "IOTA_HTTP_HOST=iot-agent"
+        - "IOTA_HTTP_PORT=7896"
+        - "DUMMY_DEVICES_PORT=3001"
+        - "DUMMY_DEVICES_API_KEY=4jggokgpepnvsb2uv4s40d59ov"
+        - "DUMMY_DEVICES_TRANSPORT=HTTP"
+        - "DUMMY_DEVICES_PAYLOAD=JSON"
+        - "IOTA_JSON_LD_CONTEXT=http://context/user-context.jsonld"
+
+volumes:
+  mongo-db: ~
+  mongo-config: ~
