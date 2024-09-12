@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  # @context file is served from here
+  ld-context:
+    image: httpd:alpine
+    hostname: context
+    container_name: fiware-ld-context
+    ports:
+        - "3005:80"
+        
+   # Databases
+  orion:
+    platform: linux/amd64
+    image: quay.io/fiware/orion-ld:latest
+    hostname: orion
+    container_name: fiware-orion
+    depends_on:
+      - mongo-db
+    networks:
+      - default
+    expose:
+      - "1026"
+    ports:
+      - "1027:1026"
+    command: -dbhost mongo-db -logLevel DEBUG -forwarding -mongocOnly
+    healthcheck:
+      test: curl --fail -s http://orion:1026/version || exit 1
+
+  mongo-db:
+    image: mongo:4.4
+    hostname: mongo-db
+    container_name: db-mongo
+    expose:
+      - "27017"
+    ports:
+      - "27018:27017" # localhost:27017
+    networks:
+      - default
+    volumes:
+      - mongo-db:/data/db
+      - mongo-config:/data/configdb
+
+networks:
+  default:
+
+volumes:
+  mongo-db: ~
+  mongo-config: ~
