@@ -2,7 +2,7 @@ version: "3.8"
 services:
   orion:
     platform: linux/amd64
-    image: quay.io/fiware/orion-ld:1.6.0-pre-1615
+    image: quay.io/fiware/orion-ld:1.6.0
     hostname: orion
     container_name: fiware-orion
     depends_on:
@@ -11,21 +11,21 @@ services:
       - default
     ports:
       - "1027:1026"
-    command: -dbhost mongo-db -logLevel DEBUG -forwarding -experimental -wip entityMaps 
+    command: -dbhost mongo-db -logLevel DEBUG -forwarding -mongocOnly -wip entityMaps
     healthcheck:
       test: ["CMD", "curl", "--fail", "-s", "http://orion:1026/version", "||", "exit", "1"]
 
   mongo-db:
-    image: mongo:4.4
+    image: mongo:6.0
     hostname: mongo-db
     container_name: db-mongo
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD","mongosh", "localhost:27017/test", "--quiet"]
       interval: 10s
       timeout: 5s
       retries: 5
     expose:
-      - 27017
+      - "27017"
     ports:
       - "27018:27017"
     networks:
@@ -34,23 +34,20 @@ services:
   quantumleap:
     labels:
       org.fiware: 'SmartWorld'
-    image: quay.io/fiware/quantumleap:0.9.0-PRE
+    image: quay.io/fiware/quantumleap:1.0.0
     hostname: quantumleap
     container_name: fiware-quantumleap
     depends_on:
       - crate-db
-      - redis-db
     networks:
       - default
     ports:
       - "8669:8668"
     environment:
       - CRATE_HOST=crate-db
-      - REDIS_HOST=redis-db
-      - REDIS_PORT=6379
       - LOGLEVEL=DEBUG
     healthcheck:
-      test: curl --fail -s http://quantumleap:${QUANTUMLEAP_PORT}/version || exit 1
+      test: curl --fail -s http://quantumleap:8668/version || exit 1
 
   ld-context:
     labels:
@@ -60,7 +57,7 @@ services:
     container_name: fiware-ld-context
     restart: always
     ports:
-      - "3004:80"
+      - "3005:80"
     volumes:
       - data-models:/usr/local/apache2/htdocs/
     networks:
@@ -68,26 +65,11 @@ services:
     healthcheck:
       test: (wget --server-response --spider --quiet http://ld-context/ngsi-context.jsonld 2>&1 | awk 'NR==1{print $$2}'| grep -q -e "200") || exit 1
 
-  redis-db:
-    labels:
-      org.fiware: 'SmartWorld'
-    image: docker.io/library/redis:latest
-    hostname: redis-db
-    container_name: db-redis
-    networks:
-      - default
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis-db:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
 
   crate-db:
     labels:
       org.fiware: 'SmartWorld'
-    image: docker.io/crate/crate:latest
+    image: docker.io/crate/crate:4.8.1
     hostname: crate-db
     container_name: db-crate
     ports:
@@ -102,6 +84,5 @@ services:
 volumes:
   mongo_data:
   crate-db:
-  redis-db:
   data-models:
 

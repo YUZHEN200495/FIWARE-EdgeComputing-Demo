@@ -1,0 +1,102 @@
+version: "3.1"
+
+services:
+
+  iot-agent:
+    restart: always
+    image: fiware/iotagent-json:1.8.0
+    hostname: iot-agent
+    container_name: tot-agent
+    networks:
+      - main
+    ports:
+      - "4041:4041"
+    depends_on:
+      - mongo-db
+    volumes:
+      - ./iotagent-json-config.js:/opt/iotajson/config.js
+
+
+  mosquitto:
+    restart: always
+    image: eclipse-mosquitto:1.5
+    hostname: mosquitto
+    container_name: mosquitto
+    networks:
+      - main
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+
+  orion:
+    restart: always
+    image: fiware/orion:2.0.0
+    hostname: orion
+    container_name: orion
+    networks:
+      - main
+    ports:
+      - "1026:1026"
+    depends_on:
+      - mongo-db
+    command: -dbhost mongo-db -logLevel DEBUG
+
+  mongo-db:
+    restart: always
+    image: mongo:3.6
+    hostname: mongo-db
+    container_name: mongo-db
+    networks:
+      - main
+    ports:
+      - "27017:27017"
+    volumes:
+      - vol-mongo-db:/data
+    command: --bind_ip_all --smallfiles
+
+
+  perseo-core:
+    restart: always
+    image: telefonicaiot/perseo-core:1.2.0
+    hostname: perseo-core
+    container_name: perseo-core
+    networks:
+      - main
+    ports:
+      - "8080:8080"
+    depends_on:
+      - orion
+    command: -perseo_fe_url perseo-fe:9090
+
+  perseo-fe:
+    restart: always
+    image: telefonicaiot/perseo-fe:1.7.0
+    hostname: perseo-fe
+    container_name: perseo-fe
+    networks:
+      - main
+    ports:
+      - "9090:9090"
+    depends_on:
+      - perseo-core
+    environment:
+      - PERSEO_MONGO_ENDPOINT=mongo-db
+      - PERSEO_CORE_URL=http://perseo-core:8080
+      - PERSEO_LOG_LEVEL=debug
+      - PERSEO_ORION_URL=http://orion:1026/NGSI10/updateContext
+      - PERSEO_SMTP_HOST=smtp.gmail.com
+      - PERSEO_SMTP_PORT=465
+      - PERSEO_SMTP_SECURE=true
+      - PERSEO_SMTP_AUTH_USER=your@email.de
+      - PERSEO_SMTP_AUTH_PASS=yourpassword
+
+
+networks:
+  main:
+
+volumes:
+  vol-mongo-db:
+  vol-crate-db:
+  vol-grafana:
