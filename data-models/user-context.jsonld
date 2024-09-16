@@ -139,5 +139,10 @@
         "species": "fiware:species",
         "sex": "fiware:sex",
         "legalID": "fiware:legalID"
+        "chargingBehaviour": "http://example.org/chargingBehaviour",
+        "dischargingBehaviour": "http://example.org/dischargingBehaviour",
+        "newTempC": "http://example.org/newTempC",
+        "CO2": "http://example.org/CO2"
+
     }
 }

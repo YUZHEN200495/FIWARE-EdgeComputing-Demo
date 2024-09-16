@@ -10,6 +10,7 @@ services:
     restart: always
     depends_on:
       - mongo-db
+      - ld-context
     networks:
       - default
     expose:
@@ -32,6 +33,7 @@ services:
     depends_on:
       - mongo-db
       - mosquitto
+      - ld-context
     networks:
       - default
     expose:
@@ -110,6 +112,19 @@ services:
     healthcheck:
       test: curl --fail -s http://quantumleap:8668/version || exit 1
 
+# @context file is served from here 
+  ld-context:
+    labels:
+      org.fiware: 'SmartWorld'
+    image: httpd:alpine
+    hostname: context
+    container_name: fiware-ld-context
+    ports:
+        - "3004:80"
+    volumes:
+        - data-models:/usr/local/apache2/htdocs/
+    healthcheck:
+      test: (wget --server-response --spider --quiet  http://context/user-context.jsonld 2>&1 | awk 'NR==1{print $$2}'|  grep -q -e "200") || exit 1
 
 
   mongo-db:
