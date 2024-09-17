@@ -181,6 +181,15 @@ services:
     volumes:
       - grafana:/var/lib/grafana
 
+ battery_controller:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ..:/app
+    command: python soh_estimator.py
+    networks:
+      - default
 
 volumes:
   crate-db: ~
