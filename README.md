@@ -58,7 +58,7 @@ curl -v -L -X POST 'http://localhost:1026/ngsi-ld/v1/subscriptions/' \
       ]
     }
   },
-   "@context": "http://context/user-context.jsonld"
+   "@context": "https://schema.lab.fiware.org/ld/context"
 }'
 ```
 
@@ -72,17 +72,49 @@ curl -X GET 'http://localhost:1026/ngsi-ld/v1/subscriptions/' \
 curl -v POST 'http://localhost:1026/ngsi-ld/v1/entities' \
 -H 'NGSILD-Tenant: swbf' \
 -H 'Content-Type: application/json' \
--H 'Link: <http://context/user-context.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"' \
+-H 'Link: <https://schema.lab.fiware.org/ld/context>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"' \
 -H 'Accept: application/ld+json' \
 --data-raw '
   {
-    "id": "urn:ngsi-ld:BatteryControllers:Controller0009",
+    "id": "urn:ngsi-ld:BatteryControllers:Controller0001",
     "type": "BatteryControllers",
     "chargingBehaviour": {"type": "Property","value": 10},
     "dischargingBehaviour": {"type": "Property","value": 10},
     "newTempC": {"type": "Property","value": 10},
     "CO2": {"type": "Property","value": 10}
   }'
+  ```
+
+  ```
+curl -v GET 'http://localhost:1026/ngsi-ld/v1/entities/urn:ngsi-ld:BatteryControllers:Controller0001' \
+-H 'NGSILD-Tenant: swbf' \
+-H 'Content-Type: application/json' \
+-H 'Link: <https://schema.lab.fiware.org/ld/context>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"' \
+-H 'Accept: application/ld+json'
+
+  ```
+5 UPDATE VALUES FROM CB and read back
+  ```
+curl -v PATCH 'http://localhost:1026/ngsi-ld/v1/entities/urn:ngsi-ld:BatteryControllers:Controller0001/attrs' \
+-H 'Content-Type: application/json' \
+-H 'NGSILD-Tenant: swbf' \
+-H 'Link: <https://schema.lab.fiware.org/ld/context>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"' \
+-H 'Accept: application/ld+json' \
+--data-raw '
+  {
+    "chargingBehaviour": {"type": "Property","value": 7},
+    "dischargingBehaviour": {"type": "Property","value": 7},
+    "newTempC": {"type": "Property","value": 7},
+    "CO2": {"type": "Property","value": 7}
+  }'
+
+
+  ```
+curl -v GET 'http://localhost:1026/ngsi-ld/v1/entities/urn:ngsi-ld:BatteryControllers:Controller0001' \
+-H 'NGSILD-Tenant: swbf' \
+-H 'Content-Type: application/json' \
+-H 'Link: <https://schema.lab.fiware.org/ld/context>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"' \
+-H 'Accept: application/ld+json'
   ```
 ---
 
