@@ -79,7 +79,7 @@ Then to use  a GET Request to Retrieve the Entity:
 
 ```shell
 curl -X GET 'http://localhost:1026/ngsi-ld/v1/entities/urn:ngsi-ld:Battery:001' \
--H 'Link: <http://context/user-context.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"'
+-H 'Link: <https://schema.lab.fiware.org/ld/context>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"'
 ```
 
 Also retrieve entities by ID or Type:
