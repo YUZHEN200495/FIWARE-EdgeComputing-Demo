@@ -108,14 +108,40 @@ curl -v PATCH 'http://localhost:1026/ngsi-ld/v1/entities/urn:ngsi-ld:BatteryCont
     "CO2": {"type": "Property","value": 7}
   }'
 
-
+  ```
   ```
 curl -v GET 'http://localhost:1026/ngsi-ld/v1/entities/urn:ngsi-ld:BatteryControllers:Controller0001' \
 -H 'NGSILD-Tenant: swbf' \
 -H 'Content-Type: application/json' \
 -H 'Link: <https://schema.lab.fiware.org/ld/context>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"' \
 -H 'Accept: application/ld+json'
+
   ```
+READ FROM QUANTUM LEAP 
+  ```
+curl -X GET 'http://localhost:8668/v2/entities/urn:ngsi-ld:BatteryControllers:Controller0001/attrs/chargingBehaviour?limit=3' \
+  -H 'Accept: application/json' \
+  -H 'Fiware-Service: swbf'
+  ```
+```
+curl -X GET 'http://localhost:8668/v2/entities/urn:ngsi-ld:BatteryControllers:Controller0001/attrs/chargingBehaviour?aggrMethod=count&aggrPeriod=minute&lastN=3' \
+  -H 'Accept: application/json' \
+  -H 'Fiware-Service: swbf'
+```
+Read from Quantumleap
+```
+curl -iX POST 'http://localhost:4200/_sql' \
+  -H 'Content-Type: application/json' \
+  -d '{"stmt":"SHOW SCHEMAS"}'
+
+curl -X POST 'http://localhost:4200/_sql' \
+  -H 'Content-Type: application/json' \
+  -d '{"stmt":"SHOW TABLES"}'
+
+curl -iX POST 'http://localhost:4200/_sql' \
+  -H 'Content-Type: application/json' \
+  -d '{"stmt":"SELECT * FROM mtswbf.etbatterycontrollers WHERE entity_id = '\''urn:ngsi-ld:BatteryControllers:Controller0009'\''  ORDER BY time_index DESC LIMIT 3"}'
+```
 ---
 
 ## License
